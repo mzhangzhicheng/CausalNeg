@@ -1,0 +1,54 @@
+# =============================================================================
+# Baseline Configuration: Standard InfoNCE Training
+# =============================================================================
+
+# Model
+model:
+  name: "Qwen/Qwen3-0.6B"
+  type: "qwen3"
+  max_length: 8192
+  pooler_type: "last"
+  do_norm: true
+  attn_type: "causal"
+
+# Loss: Standard InfoNCE
+loss:
+  type: "infonce"
+  temperature: 0.05
+  use_in_batch_negatives: false
+  mask_fake_negative: true
+
+# Entropy auxiliary loss: DISABLED for baseline
+entropy:
+  weight: 0.0
+  temperature: 0.0
+  num_mined_negatives: 0
+  num_generated_negatives: 0
+
+# Training
+training:
+  train_type: "full"
+  num_epochs: 10
+  batch_size: 4
+  gradient_accumulation_steps: 8
+  learning_rate: 5.0e-5
+  warmup_ratio: 0.1
+  eval_steps: 10
+  save_steps: 10
+  early_stop_interval: 3
+  split_dataset_ratio: 0.05
+
+# Data
+data:
+  type: "mine_15"
+  format: "jsonl"
+
+# Evaluation
+evaluation:
+  tasks:
+    hotpotqa: "HotpotQAHardNegatives"
+    mmarco: "MMarcoRetrieval"
+    trivia: "TriviaQAHardNegatives"
+    nq: "NQRetrieval"
+  batch_size: 16
+  precision: "fp16"

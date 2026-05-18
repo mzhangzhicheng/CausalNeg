@@ -1,0 +1,56 @@
+# =============================================================================
+# Our Method: InfoNCE + Query-Perspective Entropy Maximization
+# =============================================================================
+# Key difference from baseline: entropy.weight > 0, adding auxiliary loss
+
+# Model (same as baseline)
+model:
+  name: "Qwen/Qwen3-0.6B"
+  type: "qwen3"
+  max_length: 8192
+  pooler_type: "last"
+  do_norm: true
+  attn_type: "causal"
+
+# Loss: InfoNCE + Entropy Maximization
+loss:
+  type: "infonce_entropy"
+  temperature: 0.05
+  use_in_batch_negatives: false
+  mask_fake_negative: true
+
+# Entropy auxiliary loss: ENABLED
+entropy:
+  weight: 0.05
+  temperature: 0.1
+  num_mined_negatives: 15
+  num_generated_negatives: 3
+  log_interval: 10
+
+# Training (same as baseline for fair comparison)
+training:
+  train_type: "full"
+  num_epochs: 10
+  batch_size: 4
+  gradient_accumulation_steps: 8
+  learning_rate: 5.0e-5
+  warmup_ratio: 0.1
+  eval_steps: 10
+  save_steps: 10
+  early_stop_interval: 3
+  split_dataset_ratio: 0.05
+
+# Data: must include both mined and generated negatives
+data:
+  type: "mine_15_genneg3_syneg"
+  format: "jsonl"
+
+# Evaluation (same as baseline)
+evaluation:
+  tasks:
+    hotpotqa: "HotpotQAHardNegatives"
+    mmarco: "MMarcoRetrieval"
+    trivia: "TriviaQAHardNegatives"
+    nq: "NQRetrieval"
+  batch_size: 16
+  precision: "fp16"
